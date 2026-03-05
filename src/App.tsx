@@ -25,7 +25,8 @@ const App: React.FC = () => {
       }
     };
     document.addEventListener('keydown', handleKey);
-  }, [currentPage]);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, []);
 
   return (
     <ThemeProvider>
