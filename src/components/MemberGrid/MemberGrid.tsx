@@ -5,6 +5,23 @@ import { useFilters } from '../../context/FilterContext';
 import type { Member } from '../../api/mockApi';
 import './MemberGrid.css';
 
+const BOOKMARKS_KEY = 'teampulse-bookmarks';
+
+function loadBookmarks(): Set<number> {
+  try {
+    const raw = localStorage.getItem(BOOKMARKS_KEY);
+    if (!raw) return new Set();
+    const ids = JSON.parse(raw) as number[];
+    return new Set(Array.isArray(ids) ? ids : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveBookmarks(ids: Set<number>): void {
+  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([...ids]));
+}
+
 interface MemberGridProps {
   onSelectMember: (member: Member) => void;
   columns?: number;
@@ -12,14 +29,20 @@ interface MemberGridProps {
 
 export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns = 3 }) => {
   const [members, setMembers] = useState<Member[]>([]);
-  const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
+  const [bookmarks, setBookmarks] = useState<Set<number>>(loadBookmarks);
   const { filters } = useFilters();
 
   useEffect(() => {
     fetchMembers(filters).then(data => {
       setMembers(data);
+      setBookmarks(prev => {
+        if (prev.size > 0) return prev;
+        const fromApi = new Set(data.filter(m => m.bookmarked).map(m => m.id));
+        saveBookmarks(fromApi);
+        return fromApi;
+      });
     });
-  }, [{ status: filters.status, role: filters.role }]);
+  }, [filters.status, filters.role]);
 
   const handleBookmark = (id: number) => {
     const next = new Set(bookmarks);
@@ -29,6 +52,7 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
       next.add(id);
     }
     setBookmarks(next);
+    saveBookmarks(next);
   };
 
   const displayMembers = members.map(m => ({
