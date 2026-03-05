@@ -19,7 +19,11 @@ function loadBookmarks(): Set<number> {
 }
 
 function saveBookmarks(ids: Set<number>): void {
-  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([...ids]));
+  try {
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([...ids]));
+  } catch {
+    /* ignore quota or disabled localStorage */
+  }
 }
 
 interface MemberGridProps {

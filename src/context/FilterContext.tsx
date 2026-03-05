@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 export interface FilterState {
   status: string;
@@ -18,12 +18,14 @@ export const FilterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     role: '',
   });
 
-  const updateFilter = (key: keyof FilterState, value: string) => {
+  const updateFilter = useCallback((key: keyof FilterState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  }, []);
+
+  const value = useMemo(() => ({ filters, updateFilter }), [filters, updateFilter]);
 
   return (
-    <FilterContext.Provider value={{ filters, updateFilter }}>
+    <FilterContext.Provider value={value}>
       {children}
     </FilterContext.Provider>
   );

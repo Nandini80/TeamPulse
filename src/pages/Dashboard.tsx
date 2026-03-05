@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { StatsCards } from '../components/StatsCards/StatsCards';
 import { MemberGrid } from '../components/MemberGrid/MemberGrid';
 import { StandupTimer } from '../components/Timer/StandupTimer';
@@ -23,9 +23,11 @@ export function Dashboard({ memberToOpen, onClearMemberToOpen }: DashboardProps)
   }, [memberToOpen, onClearMemberToOpen]);
 
   useEffect(() => {
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       setGridCols(window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3);
-    });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
@@ -41,6 +43,7 @@ export function Dashboard({ memberToOpen, onClearMemberToOpen }: DashboardProps)
       <MemberGrid onSelectMember={setSelectedMember} columns={gridCols} />
       {selectedMember && (
         <MemberModal
+          key={selectedMember.id}
           member={selectedMember}
           onClose={() => {
             setSelectedMember(null);
