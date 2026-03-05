@@ -24,13 +24,18 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSelectMemberFromSe
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryRef = useRef(query);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const notificationContainerRef = useRef<HTMLDivElement>(null);
   queryRef.current = query;
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (searchContainerRef.current && !searchContainerRef.current.contains(target)) {
         setSearchResults([]);
         setQuery('');
+      }
+      if (notificationContainerRef.current && !notificationContainerRef.current.contains(target)) {
+        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleMouseDown);
@@ -102,13 +107,18 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSelectMemberFromSe
       </div>
       <div className="header__right">
         <span className="header__greeting">{greeting}, John</span>
-        <button
-          className="header__notification-btn"
-          onClick={() => setShowNotifications(!showNotifications)}
-        >
-          🔔
-        </button>
-        {showNotifications && <NotificationDropdown />}
+        <div ref={notificationContainerRef} style={{ position: 'relative' }}>
+          <button
+            className="header__notification-btn"
+            onClick={() => setShowNotifications(!showNotifications)}
+            type="button"
+            aria-expanded={showNotifications}
+            aria-haspopup="true"
+          >
+            🔔
+          </button>
+          {showNotifications && <NotificationDropdown />}
+        </div>
         <div className="header__avatar">JD</div>
       </div>
     </header>
