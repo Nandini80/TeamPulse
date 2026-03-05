@@ -7,6 +7,7 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { Dashboard } from './pages/Dashboard';
 import { ActivityPage } from './pages/ActivityPage';
 import { SearchOverlay } from './components/Search/SearchOverlay';
+import type { Member } from './api/mockApi';
 import './App.css';
 
 type Page = 'dashboard' | 'activity';
@@ -14,6 +15,7 @@ type Page = 'dashboard' | 'activity';
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [memberToOpenFromSearch, setMemberToOpenFromSearch] = useState<Member | null>(null);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -30,7 +32,13 @@ const App: React.FC = () => {
       <FilterProvider>
         <ToastProvider>
           <div className="app-layout">
-            <Header onNavigate={(page) => setCurrentPage(page as Page)} />
+            <Header
+              onNavigate={(page) => setCurrentPage(page as Page)}
+              onSelectMemberFromSearch={(member) => {
+                setMemberToOpenFromSearch(member);
+                setCurrentPage('dashboard');
+              }}
+            />
             <div className="app-body">
               <Sidebar
                 currentPage={currentPage}
@@ -39,7 +47,12 @@ const App: React.FC = () => {
               />
               <main className="main-content">
                 <div className="dashboard-content">
-                  {currentPage === 'dashboard' && <Dashboard />}
+                  {currentPage === 'dashboard' && (
+                  <Dashboard
+                    memberToOpen={memberToOpenFromSearch}
+                    onClearMemberToOpen={() => setMemberToOpenFromSearch(null)}
+                  />
+                )}
                   {currentPage === 'activity' && <ActivityPage />}
                 </div>
               </main>

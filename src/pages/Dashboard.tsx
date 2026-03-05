@@ -6,13 +6,24 @@ import { MemberModal } from '../components/MemberModal/MemberModal';
 import type { Member } from '../api/mockApi';
 import './Dashboard.css';
 
-export const Dashboard: React.FC = () => {
+export interface DashboardProps {
+  memberToOpen?: Member | null;
+  onClearMemberToOpen?: () => void;
+}
+
+export function Dashboard({ memberToOpen, onClearMemberToOpen }: DashboardProps) {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [gridCols, setGridCols] = useState(3);
 
   useEffect(() => {
+    if (memberToOpen) {
+      setSelectedMember(memberToOpen);
+      onClearMemberToOpen?.();
+    }
+  }, [memberToOpen, onClearMemberToOpen]);
+
+  useEffect(() => {
     window.addEventListener('resize', () => {
-      console.log('resize handler fired');
       setGridCols(window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3);
     });
   }, []);
@@ -31,10 +42,13 @@ export const Dashboard: React.FC = () => {
       {selectedMember && (
         <MemberModal
           member={selectedMember}
-          onClose={() => setSelectedMember(null)}
+          onClose={() => {
+            setSelectedMember(null);
+            onClearMemberToOpen?.();
+          }}
           onUpdateMember={(updated) => setSelectedMember(updated)}
         />
       )}
     </div>
   );
-};
+}

@@ -54,10 +54,14 @@ export async function saveMember(member: Member): Promise<void> {
 }
 
 export async function searchMembers(query: string): Promise<Member[]> {
-  const searchDelay = 50 + Math.floor(Math.random() * 750);
+  const searchDelay = 50 + Math.floor(Math.random() * 400);
   await delay(searchDelay);
-  const lower = query.toLowerCase();
+  const lower = query.trim().toLowerCase();
+  if (!lower) return [];
   return memberStore.filter(
-    m => m.name.toLowerCase().includes(lower) || m.email.toLowerCase().includes(lower)
+    m =>
+      m.name.toLowerCase().includes(lower) ||
+      m.email.toLowerCase().includes(lower) ||
+      m.role.toLowerCase().includes(lower)
   );
 }
