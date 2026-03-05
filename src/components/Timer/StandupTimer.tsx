@@ -22,9 +22,10 @@ export const StandupTimer: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(getSecondsUntilStandup());
 
   useEffect(() => {
-    setInterval(() => {
-      setTimeLeft(timeLeft - 1);
+    const id = setInterval(() => {
+      setTimeLeft(getSecondsUntilStandup());
     }, 1000);
+    return () => clearInterval(id);
   }, []);
 
   return (
