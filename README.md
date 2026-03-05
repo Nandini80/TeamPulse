@@ -1,98 +1,66 @@
-# TeamPulse — Frontend Intern Assignment (Submission)
+# TeamPulse — Frontend Intern Assignment
 
-A React + TypeScript team activity dashboard. This repo contains the **completed** assignment: bug fixes and the Search Comments feature.
+React + TypeScript team dashboard. This repo is my submission: bug fixes and the Search Comments feature.
 
 ---
 
-## Deliverables (quick links)
+## Deliverables
 
-| Deliverable | File |
-|-------------|------|
-| Bug report (each fix explained) | [BUG_REPORT.md](./BUG_REPORT.md) |
-| Search feature implementation notes | [FEATURE_NOTES.md](./FEATURE_NOTES.md) |
+| What | Where |
+|------|--------|
+| Bug report (symptom, cause, fix per bug) | [BUG_REPORT.md](./BUG_REPORT.md) |
+| Search feature notes | [FEATURE_NOTES.md](./FEATURE_NOTES.md) |
 | Time log | [TIME_LOG.md](./TIME_LOG.md) |
 
 ---
 
-## Getting Started
+## How to run it
 
 ```bash
 npm install
 npm run dev
 ```
 
-The app runs at `http://localhost:5173`.
+Opens at `http://localhost:5173`.
 
-- **Sidebar:** Dashboard, Activity Feed, Search Comments (or ⌘K / Ctrl+K for search).
-- **Header:** Team member search (name/email/role), notifications (bell), greeting.
-- **Dashboard:** Stats, standup timer, member grid with bookmarks; click a member for the detail modal.
-- **Activity Feed:** Activity list with sort/filter and batch assign.
+- **Sidebar:** Dashboard, Activity Feed, Search Comments (or ⌘K / Ctrl+K).
+- **Header:** Search members (name/email/role), notifications (bell), greeting.
+- **Dashboard:** Stats, standup timer, member grid with bookmarks; click a card for the modal.
+- **Activity Feed:** List with sort/filter and batch assign.
 
 ---
 
-## Choices, approach, and trade-offs
+## How I approached it
 
-### Bug-fixing approach
+**Bugs:** I went through the assignment’s user stories and poked around the app—navigation, search, filters, timer, bookmarks, modal, notifications. When something felt wrong I checked the console and React DevTools and traced it back to the cause (e.g. setState during render, mutating state, missing cleanup). I tried to fix the root cause, not just the symptom, and wrote up each one in BUG_REPORT.md with whether it was tied to another bug.
 
-- Reproduced issues from the assignment’s user stories and by using the app (navigation, search, filters, timer, bookmarks, modal, notifications).
-- Used the browser console (errors, warnings) and React DevTools to track down state and effect issues.
-- Fixed causes, not only symptoms: e.g. filter “not updating” was fixed by fixing the context setState (new object reference), not by forcing a re-render elsewhere.
-- Documented each bug in [BUG_REPORT.md](./BUG_REPORT.md) with: symptom, root cause, fix, and links between bugs where relevant.
+**Search Comments:** The API doesn’t support search, so I fetch all 500 comments once and filter in memory. That keeps typing instant and avoids race conditions. I added a small API module (fetch + search + snippet/highlight), rewrote the overlay with a proper search bar, result list, and highlight (using `<mark>` and `<span>`, no injected HTML). Keyboard: arrows to move, wrap at top/bottom, Escape to close. Click outside to close. More detail and trade-offs are in FEATURE_NOTES.md.
 
-### Search Comments feature
-
-- **Data:** Single fetch of all 500 comments from JSONPlaceholder, then client-side filter over `name`, `email`, and `body`. Cached so reopening the overlay doesn’t re-fetch.
-- **UX:** Full-screen overlay with blurred backdrop, clear/search bar, result count, and list with snippet highlighting. Keyboard: Arrow Up/Down (with wrap), Escape to close. Click outside (backdrop) to close.
-- **Highlighting:** Implemented with React-rendered `<mark>` and `<span>` segments (no `dangerouslySetInnerHTML`), driven by a small helper that returns `{ text, highlight }` parts.
-- **Trade-off:** No debounce on typing; filtering is synchronous and fast for 500 items. The spec’s “brief pause after I stop typing” could be met by adding a 200–300 ms debounce if desired.
-- **Trade-off:** Enter key does not yet “expand” the highlighted result; that would be a small addition (e.g. expand body in place or open a detail view).
-
-Details and file-level notes are in [FEATURE_NOTES.md](./FEATURE_NOTES.md).
-
-### Constraints respected
-
-- No external UI or utility libraries (no MUI, lodash, react-window, etc.). React, TypeScript, and standard DOM/CSS only.
-- Styling is plain CSS (no Tailwind). Search overlay uses existing design tokens (e.g. `var(--primary)`, `var(--surface)`) where possible.
+**Constraints:** No external UI or utility libs—just React, TypeScript, and the DOM. Styling is plain CSS; the search overlay uses the existing CSS variables where it made sense.
 
 ---
 
 ## What I’d improve with more time
 
-1. **Search Comments**
-   - Optional 200–300 ms debounce on the search input to match “brief pause” wording.
-   - Enter key: expand or select the highlighted result (e.g. show full body).
-   - Guard against setState after unmount when the overlay is closed before `fetchComments()` resolves (e.g. an “isMounted” or abort ref).
-   - Virtualized list if result sets grow beyond a few hundred items.
-
-2. **Testing**
-   - Unit tests for filter context, search/filter helpers, and highlight/snippet logic.
-   - A few integration tests (e.g. open search overlay, type, see results and highlight).
-
-3. **Accessibility**
-   - Focus trap inside the search overlay and restore focus to the trigger on close.
-   - ARIA live region for result count and loading/error messages.
-
-4. **Loading and errors**
-   - Global loading/error handling for member and activity fetches (e.g. toasts or inline messages) so “Data Loading” user stories are fully covered.
-
-5. **Git history**
-   - The assignment asks for one commit per bug with messages describing the symptom. If you need that, I can restructure the history into separate commits (e.g. “fix: infinite re-renders in header greeting”, “fix: activity feed duplicates”, etc.).
+- **Search:** Optional debounce to match “brief pause” wording; Enter to expand the highlighted result; guard against setState after unmount when you close before the fetch finishes; virtualize the list if we ever have way more results.
+- **Tests:** Unit tests for the filter context, search/highlight helpers; a couple of integration tests for the overlay (open, type, see results and highlight).
+- **A11y:** Focus trap in the overlay and restore focus on close; ARIA for result count and loading/error.
+- **Loading/errors:** Clearer loading and error handling for member and activity fetches so the “Data Loading” stories are fully covered.
+- **Git history:** The assignment asks for one commit per bug with messages that describe the symptom. If you need that, I can split the history into separate commits (e.g. “fix: infinite re-renders in header”, “fix: activity feed duplicates”, etc.).
 
 ---
 
 ## Stack
 
-- React 18  
-- TypeScript  
-- Vite  
-- Raw CSS (no Tailwind)
+React 18, TypeScript, Vite, raw CSS (no Tailwind).
 
 ---
 
-## Original assignment instructions (summary)
+## Repo & deploy
 
-- Find and fix bugs; document them in **BUG_REPORT.md**.
-- Build the Search Comments feature from scratch; document approach in **FEATURE_NOTES.md**.
-- Provide **README.md** (choices, approach, trade-offs, improvements), **TIME_LOG.md**, repo link, and deployed link.
+- **GitHub:** [your-repo-link]
+- **Live:** [your-deploy-link]
 
-Partial submissions are acceptable; any remaining work or known gaps are noted above and in the other docs.
+*(Fill these in before you submit.)*
+
+Partial submissions are fine—anything I didn’t get to is called out above and in the other docs.
