@@ -1,71 +1,98 @@
-# TeamPulse — Frontend Intern Assignment
+# TeamPulse — Frontend Intern Assignment (Submission)
 
-A React + TypeScript team activity dashboard. Your job is to find and fix the bugs, then build a new feature.
+A React + TypeScript team activity dashboard. This repo contains the **completed** assignment: bug fixes and the Search Comments feature.
+
+---
+
+## Deliverables (quick links)
+
+| Deliverable | File |
+|-------------|------|
+| Bug report (each fix explained) | [BUG_REPORT.md](./BUG_REPORT.md) |
+| Search feature implementation notes | [FEATURE_NOTES.md](./FEATURE_NOTES.md) |
+| Time log | [TIME_LOG.md](./TIME_LOG.md) |
+
+---
 
 ## Getting Started
-
-1. Install dependencies and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The app will open at `http://localhost:5173`. Poke around, open the browser console, resize the viewport, and start finding bugs.
+The app runs at `http://localhost:5173`.
 
-2. Create your own private GitHub repository and push your work there — this is what you submit.
+- **Sidebar:** Dashboard, Activity Feed, Search Comments (or ⌘K / Ctrl+K for search).
+- **Header:** Team member search (name/email/role), notifications (bell), greeting.
+- **Dashboard:** Stats, standup timer, member grid with bookmarks; click a member for the detail modal.
+- **Activity Feed:** Activity list with sort/filter and batch assign.
 
-## Your Tasks
+---
 
-1. **Find and fix bugs** — The app compiles and runs, but is riddled with bugs. Some are obvious; others are subtle. Some are connected — fixing one may reveal another. It's up to you to discover what's broken and how deep it goes.
+## Choices, approach, and trade-offs
 
-2. **Build the Search feature** — The "Search Comments" feature in the sidebar is a non-functional placeholder. Build it from scratch following the requirements on the assignment page.
+### Bug-fixing approach
 
-3. **Write a bug report** — Document each bug you find and fix.
+- Reproduced issues from the assignment’s user stories and by using the app (navigation, search, filters, timer, bookmarks, modal, notifications).
+- Used the browser console (errors, warnings) and React DevTools to track down state and effect issues.
+- Fixed causes, not only symptoms: e.g. filter “not updating” was fixed by fixing the context setState (new object reference), not by forcing a re-render elsewhere.
+- Documented each bug in [BUG_REPORT.md](./BUG_REPORT.md) with: symptom, root cause, fix, and links between bugs where relevant.
 
-## Constraints
+### Search Comments feature
 
-- No external UI component libraries (no MUI, shadcn, Chakra, Radix)
-- No external utility libraries (no lodash, no react-window, no headless UI)
-- React, TypeScript, and standard browser/DOM APIs only
-- Raw CSS or CSS Modules for styling
+- **Data:** Single fetch of all 500 comments from JSONPlaceholder, then client-side filter over `name`, `email`, and `body`. Cached so reopening the overlay doesn’t re-fetch.
+- **UX:** Full-screen overlay with blurred backdrop, clear/search bar, result count, and list with snippet highlighting. Keyboard: Arrow Up/Down (with wrap), Escape to close. Click outside (backdrop) to close.
+- **Highlighting:** Implemented with React-rendered `<mark>` and `<span>` segments (no `dangerouslySetInnerHTML`), driven by a small helper that returns `{ text, highlight }` parts.
+- **Trade-off:** No debounce on typing; filtering is synchronous and fast for 500 items. The spec’s “brief pause after I stop typing” could be met by adding a 200–300 ms debounce if desired.
+- **Trade-off:** Enter key does not yet “expand” the highlighted result; that would be a small addition (e.g. expand body in place or open a detail view).
 
-## Deliverables
+Details and file-level notes are in [FEATURE_NOTES.md](./FEATURE_NOTES.md).
 
-1. **GitHub repo link** — your own repo, created from this zip
-2. **Deployed link** — Vercel / Netlify / etc.
-3. **README.md** — choices, approach, trade-offs, and what you'd improve with more time
-4. **BUG_REPORT.md** — see format below
-5. **FEATURE_NOTES.md** — brief notes on your search implementation approach
-6. **Time log** — approximate hours spent (honor system)
-7. **Git commit history** — your first commit should be the original codebase unchanged. Each subsequent commit should correspond to one bug fix. Commit messages must describe the symptom you observed (e.g. "fix: timer freezes after first tick" not "fix bug 1").
+### Constraints respected
 
-**Partial submissions are totally acceptable.** If you run out of time, submit what you have and note in README.md what's remaining and what you would do next.
+- No external UI or utility libraries (no MUI, lodash, react-window, etc.). React, TypeScript, and standard DOM/CSS only.
+- Styling is plain CSS (no Tailwind). Search overlay uses existing design tokens (e.g. `var(--primary)`, `var(--surface)`) where possible.
 
-## BUG_REPORT.md Format
+---
 
-Use this template for **each** bug you find. Copy it once per bug.
+## What I’d improve with more time
 
-```markdown
-## Bug N — [Short descriptive name]
+1. **Search Comments**
+   - Optional 200–300 ms debounce on the search input to match “brief pause” wording.
+   - Enter key: expand or select the highlighted result (e.g. show full body).
+   - Guard against setState after unmount when the overlay is closed before `fetchComments()` resolves (e.g. an “isMounted” or abort ref).
+   - Virtualized list if result sets grow beyond a few hundred items.
 
-- **Exact error / console output:** (paste verbatim — e.g. "Uncaught TypeError: Cannot read properties of null (reading 'name')" — write "no console error" if it was a silent visual bug)
-- **Steps to reproduce:**
-  1. Open the app at localhost:5173
-  2. [exact element you clicked / action you took]
-  3. [what you observed]
-- **Viewport / device tested:** (e.g. 1280×800 desktop Chrome / 375px mobile)
-- **Symptom — what you saw:** (describe what was actually happening)
-- **Root cause — the why:** (explain the underlying JS/React/CSS reason, not just "it was wrong")
-- **Fix and why it works:**
-- **Connected to another bug?** yes/no — if yes, which one and what's the connection
-```
+2. **Testing**
+   - Unit tests for filter context, search/filter helpers, and highlight/snippet logic.
+   - A few integration tests (e.g. open search overlay, type, see results and highlight).
 
-> We care about your **explanations** as much as your fixes. A correct fix with a wrong explanation scores less than a correct fix with a correct explanation.
+3. **Accessibility**
+   - Focus trap inside the search overlay and restore focus to the trigger on close.
+   - ARIA live region for result count and loading/error messages.
+
+4. **Loading and errors**
+   - Global loading/error handling for member and activity fetches (e.g. toasts or inline messages) so “Data Loading” user stories are fully covered.
+
+5. **Git history**
+   - The assignment asks for one commit per bug with messages describing the symptom. If you need that, I can restructure the history into separate commits (e.g. “fix: infinite re-renders in header greeting”, “fix: activity feed duplicates”, etc.).
+
+---
 
 ## Stack
 
-- React 18
-- TypeScript
-- Vite
+- React 18  
+- TypeScript  
+- Vite  
 - Raw CSS (no Tailwind)
+
+---
+
+## Original assignment instructions (summary)
+
+- Find and fix bugs; document them in **BUG_REPORT.md**.
+- Build the Search Comments feature from scratch; document approach in **FEATURE_NOTES.md**.
+- Provide **README.md** (choices, approach, trade-offs, improvements), **TIME_LOG.md**, repo link, and deployed link.
+
+Partial submissions are acceptable; any remaining work or known gaps are noted above and in the other docs.
