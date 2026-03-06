@@ -58,9 +58,5 @@ React 18, TypeScript, Vite, raw CSS (no Tailwind).
 
 ## Repo & deploy
 
-- **GitHub:** [your-repo-link]
-- **Live:** [your-deploy-link]
-
-*(Fill these in before you submit.)*
-
-Partial submissions are fine—anything I didn’t get to is called out above and in the other docs.
+- **GitHub:** https://github.com/Nandini80/TeamPulse
+- **Live:** https://team-pulse-flame.vercel.app/
